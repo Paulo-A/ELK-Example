@@ -1,0 +1,71 @@
+version: '2'
+
+services:
+  elasticsearch:
+    image: elasticsearch:8.1.0
+    volumes:
+      - .:/elastic
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - es-net
+    environment:
+      http.cors.enabled: "true"
+      http.cors.allow-origin: "*"
+      http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
+      transport.host: 127.0.0.1
+      http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      xpack.security.enabled: "false"
+      discovery.type: "single-node"
+      ES_JAVA_OPTS: "-Xms2g -Xmx2g"
+
+  kibana:
+    image: kibana:8.1.0
+    volumes:
+      - .:/kibana
+    ports:
+      - "5601:5601"
+    networks:
+      - es-net
+    environment:
+      ELASTICSEARCH_URL: https://0.0.0.0:9200
+    depends_on:
+      - elasticsearch
+
+  postgres:
+    build: db/.
+    image: example_postgres_db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=mypasswd
+    volumes: 
+      - data:/var/lib/postgresql/data
+    networks:
+      - es-net
+
+  logstash:
+    build: logstash/.
+    image: custom_logstash
+    ports:
+      - 9600:9600
+      - 5044:5044
+    environment:
+      ELASTICSEARCH_URL: https://0.0.0.0:9200
+      HOST: 127.0.0.1
+      PORT: 32
+      DATABASE: postgres
+      USER: postgres
+      PASSWORD: mypasswd
+    networks:
+      - es-net
+    depends_on:
+      - elasticsearch
+      - postgres
+
+volumes:
+  data: 
+networks:
+  es-net:
+    driver: bridge
