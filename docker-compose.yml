@@ -8,14 +8,10 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    hostname: es-host
     networks:
       - es-net
     environment:
-      http.cors.enabled: "true"
-      http.cors.allow-origin: "*"
-      http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
-      transport.host: 127.0.0.1
-      http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
       xpack.security.enabled: "false"
       discovery.type: "single-node"
       ES_JAVA_OPTS: "-Xms2g -Xmx2g"
@@ -29,7 +25,7 @@ services:
     networks:
       - es-net
     environment:
-      ELASTICSEARCH_URL: https://0.0.0.0:9200
+      ELASTICSEARCH_URL: https://es-host:9200
     depends_on:
       - elasticsearch
 
@@ -38,6 +34,7 @@ services:
     image: example_postgres_db
     ports:
       - 5432:5432
+    hostname: pg-host
     environment:
       - POSTGRES_PASSWORD=mypasswd
     volumes: 
@@ -52,9 +49,9 @@ services:
       - 9600:9600
       - 5044:5044
     environment:
-      ELASTICSEARCH_URL: https://0.0.0.0:9200
-      HOST: 127.0.0.1
-      PORT: 32
+      ELASTICSEARCH_URL: es-host:9200
+      HOST: pg-host
+      PORT: 5432
       DATABASE: postgres
       USER: postgres
       PASSWORD: mypasswd
