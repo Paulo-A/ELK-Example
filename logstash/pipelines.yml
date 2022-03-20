@@ -1,2 +1,2 @@
-- pipeline.id: index-houseprice
-  path.config: "/usr/share/logstash/pipeline/index_houseprice.conf"
+- pipeline.id: index-movies
+  path.config: "/usr/share/logstash/pipeline/index_movies.conf"

@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS houseprice;
-CREATE TABLE houseprice (
+DROP TABLE IF EXISTS houseprices;
+CREATE TABLE houseprices (
     Id int,
     MSSubClass int,
     MSZoning Varchar(10),
@@ -83,7 +83,7 @@ CREATE TABLE houseprice (
     SalePrice int,
     PRIMARY KEY(id)
 );
-COPY houseprice  
+COPY houseprices  
 FROM '/houseprice.csv' 
      DELIMITER ',' 
      CSV HEADER;
