@@ -1,0 +1,274 @@
+#!/bin/bash
+
+for i in {30..0}; do
+  if curl http://es-host:9200; then
+    curl -XPUT "http://es-host:9200/movies-without-mapping?pretty";
+    break;
+  fi
+  sleep 2
+done
+
+curl -XPUT "http://es-host:9200/movies-with-mapping?pretty" -H "Content-Type: application/json" -d '
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "whitespace_remove": {
+          "type": "pattern_replace",
+          "pattern": " ",
+          "replacement": ""
+        },
+        "synonyms": {
+          "type": "synonym",
+          "synonyms": [
+            "[batman, dark knight]"
+          ]
+        }
+      },
+      "analyzer": {
+        "original_title_analyser": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": [
+            "synonyms",
+            "lowercase",
+            "asciifolding"
+          ]
+        },
+        "overview_analyser": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "synonyms",
+            "whitespace_remove",
+            "lowercase",
+            "asciifolding"
+          ]
+        },
+        "title_analyser": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "synonyms",
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "budget": {
+        "type": "long"
+      },
+      "genres": {
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type": "long"
+          },
+          "name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "id": {
+        "type": "long"
+      },
+      "original_title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        },
+        "analyzer": "original_title_analyser"
+      },
+      "overview": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        },
+        "analyzer": "overview_analyser"
+      },
+      "release_date": {
+        "type": "date",
+        "format": "epoch_millis"
+      },
+      "revenue": {
+        "type": "long"
+      },
+      "runtime": {
+        "type": "long"
+      },
+      "status": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        },
+        "analyzer": "title_analyser"
+      },
+      "vote_average": {
+        "type": "float"
+      },
+      "vote_count": {
+        "type": "long"
+      }
+    }
+  }
+}'
+
+curl -XPUT "http://es-host:9200/movies-with-mapping-long?pretty" -H "Content-Type: application/json" -d '
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "whitespace_remove": {
+          "type": "pattern_replace",
+          "pattern": " ",
+          "replacement": ""
+        },
+        "synonyms": {
+          "type": "synonym",
+          "synonyms": [
+            "[batman, dark knight]"
+          ]
+        }
+      },
+      "analyzer": {
+        "original_title_analyser": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": [
+            "synonyms",
+            "lowercase",
+            "asciifolding"
+          ]
+        },
+        "overview_analyser": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "synonyms",
+            "whitespace_remove",
+            "lowercase",
+            "asciifolding"
+          ]
+        },
+        "title_analyser": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "synonyms",
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "budget": {
+        "type": "long"
+      },
+      "genres": {
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type": "long"
+          },
+          "name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "id": {
+        "type": "long"
+      },
+      "original_title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        },
+        "analyzer": "original_title_analyser"
+      },
+      "overview": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        },
+        "analyzer": "overview_analyser"
+      },
+      "release_date": {
+        "type": "long"
+      },
+      "revenue": {
+        "type": "long"
+      },
+      "runtime": {
+        "type": "long"
+      },
+      "status": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        },
+        "analyzer": "title_analyser"
+      },
+      "vote_average": {
+        "type": "float"
+      },
+      "vote_count": {
+        "type": "long"
+      }
+    }
+  }
+}'

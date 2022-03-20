@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
   elasticsearch:
@@ -26,7 +26,7 @@ services:
       - es-net
     environment:
       ELASTICSEARCH_URL: https://es-host:9200
-    depends_on:
+    depends_on: 
       - elasticsearch
 
   postgres:
@@ -57,9 +57,23 @@ services:
       PASSWORD: mypasswd
     networks:
       - es-net
-    depends_on:
+    depends_on: 
+      elasticsearch:
+        condition: service_started
+      es-index:
+        condition: service_healthy
+
+  es-index:
+    build: es-index/.
+    image: custom_es_index
+    environment:
+      ELASTICSEARCH_URL: es-host:9200
+    networks:
+      - es-net
+    depends_on: 
       - elasticsearch
-      - postgres
+    healthcheck:
+      test: "exit 0"
 
 volumes:
   data: 
